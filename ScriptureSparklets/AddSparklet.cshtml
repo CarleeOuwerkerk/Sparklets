@@ -1,0 +1,74 @@
+﻿@{
+    Page.Title = "Add a Sparklet";
+
+    Layout = "~/_SiteLayout.cshtml";
+
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+
+    Validation.RequireField("book", "You must enter a book");
+    Validation.RequireField("chapter", "Chapter is required");
+    Validation.RequireField("verse", "You haven't entered a verse");
+    Validation.RequireField("note", "You haven't entered a note");
+
+    var book = "";
+    var chapter = "";
+    var verse = "";
+    var note = "";
+
+    if (IsPost && Validation.IsValid())
+    {
+        book = Request.Form["book"];
+        chapter = Request.Form["chapter"];
+        verse = Request.Form["verse"];
+        note = Request.Form["note"];
+
+        var db = Database.Open("ScriptureSparklets");
+        var insertCommand = "INSERT INTO Sparklets (Book, Chapter, Verse, Note) VALUES(@0, @1, @2, @3)";
+        db.Execute(insertCommand, book, chapter, verse, note);
+
+        Response.Redirect("~/Sparklets");
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Add a Sparklet</title>
+</head>
+<body>
+    <h2>Add a Sparklet</h2>
+
+    @Html.ValidationSummary()
+    <form method="post">
+        <fieldset>
+            <legend>Sparklet Information</legend>
+            <p>
+                <label for="book">Book:</label>
+                <input type="text" name="book" value="@Request.Form["book"]" />
+                @Html.ValidationMessage("book")
+            </p>
+
+            <p>
+                <label for="chapter">Chapter:</label>
+                <input type="text" name="chapter" value="@Request.Form["chapter"]" />
+                @Html.ValidationMessage("chapter")
+            </p>
+
+            <p>
+                <label for="verse">Verse:</label>
+                <input type="text" name="verse" value="@Request.Form["verse"]" />
+                @Html.ValidationMessage("verse")
+            </p>
+
+            <p>
+                <label for="note">Note:</label>
+                <input type="text" name="note" value="@Request.Form["note"]" />
+                @Html.ValidationMessage("note")
+            </p>
+
+            <p><input type="submit" name="buttonSubmit" value="Add Sparklet" /></p>
+        </fieldset>
+    </form>
+</body>
+</html>

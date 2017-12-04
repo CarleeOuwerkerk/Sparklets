@@ -1,0 +1,88 @@
+﻿@{
+    Page.Title = "Delete a Sparklet";
+
+    Layout = "~/_SiteLayout.cshtml";
+
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+
+    var book = "";
+    var chapter = -1;
+    var verse = -1;
+    var note = "";
+    var Id = "";
+
+    if (!IsPost)
+    {
+        if (!Request.QueryString["Id"].IsEmpty() && Request.QueryString["Id"].IsInt())
+        {
+            Id = Request.QueryString["Id"];
+            var db = Database.Open("ScriptureSparklets");
+            var dbCommand = "SELECT * FROM Sparklets WHERE Id = @0";
+            var row = db.QuerySingle(dbCommand, Id);
+            if (row != null)
+            {
+                book = row.Book;
+                chapter = row.Chapter;
+                verse = row.Verse;
+                note = row.Note;
+            }
+            else
+            {
+                Validation.AddFormError("No sparklet was found with that ID.");
+            }
+        }
+        else
+        {
+            Validation.AddFormError("No sparklet was found with that ID.");
+        }
+    }
+
+    if (IsPost && !Request["buttonDelete"].IsEmpty())
+    {
+        Id = Request.Form["Id"];
+        var db = Database.Open("ScriptureSparklets");
+        var deleteCommand = "DELETE FROM Sparklets WHERE Id = @0";
+        db.Execute(deleteCommand, Id);
+        Response.Redirect("~/Sparklets");
+    }
+}
+
+<html>
+<head>
+    <title>Delete a Sparklet</title>
+</head>
+<body>
+    <h2>Delete a Sparklet</h2>
+    @Html.ValidationSummary()
+    <p><a href="~/Favourites">Return to all sparklets</a></p>
+
+    <form method="post">
+        <fieldset>
+            <legend>Sparklet Information</legend>
+
+            <p>
+                <span>Book:</span>
+                <span>@book</span>
+            </p>
+
+            <p>
+                <span>Chapter:</span>
+                <span>@chapter</span>
+            </p>
+            test
+            <p>
+                <span>Verse:</span>
+                <span>@verse</span>
+            </p>
+
+            <p>
+                <span>Note:</span>
+                <span>@note</span>
+            </p>
+
+            <input type="hidden" name="id" value="@Id" />
+            <p><input type="submit" name="buttonDelete" value="Delete Sparklet" /></p>
+        </fieldset>
+    </form>
+</body>
+</html> 

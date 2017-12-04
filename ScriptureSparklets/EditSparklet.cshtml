@@ -1,0 +1,105 @@
+﻿@{
+    Page.Title = "Edit a Sparklet";
+
+    Layout = "~/_SiteLayout.cshtml";
+
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+
+    var book = "";
+    var chapter = -1;
+    var verse = -1;
+    var note = "";
+    var Id = "";
+
+    if (!IsPost)
+    {
+        if (!Request.QueryString["Id"].IsEmpty() && Request.QueryString["Id"].IsInt())
+        {
+            Id = Request.QueryString["Id"];
+            var db = Database.Open("ScriptureSparklets");
+            var dbCommand = "SELECT * FROM Sparklets WHERE Id = @0";
+            var row = db.QuerySingle(dbCommand, Id);
+
+            if (row != null)
+            {
+                book = row.Book;
+                chapter = row.Chapter;
+                verse = row.Verse;
+                note = row.Note;
+            }
+            else
+            {
+                Validation.AddFormError("No sparklet was selected.");
+            }
+        }
+        else
+        {
+            Validation.AddFormError("No sparklet was selected.");
+        }
+    }
+
+    if (IsPost)
+    {
+        Validation.RequireField("book", "You must enter a book");
+        Validation.RequireField("chapter", "Chapter is required");
+        Validation.RequireField("verse", "You haven't entered a verse");
+        Validation.RequireField("note", "You haven't entered a note");
+        Validation.RequireField("Id", "No sparklet ID was submitted!");
+
+        book = Request.Form["book"];
+        chapter = int.Parse(Request.Form["chapter"]);
+        verse = int.Parse(Request.Form["verse"]);
+        note = Request.Form["note"];
+        Id = Request.Form["Id"];
+
+        if (Validation.IsValid())
+        {
+            var db = Database.Open("ScriptureSparklets");
+            var updateCommand = "UPDATE Sparklets SET Book=@0, Chapter=@1, Verse=@2, Note=@3 WHERE Id=@4";
+            db.Execute(updateCommand, book, chapter, verse, note, Id);
+            Response.Redirect("~/Sparklets");
+        }
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Edit a Movie</title>
+</head>
+<body>
+    <h2>Edit a Sparklet</h2>
+    @Html.ValidationSummary()
+    <form method="post">
+        <fieldset>
+            <legend>Sparklet Information</legend>
+
+            <p>
+                <label for="book">Book:</label>
+                <input type="text" name="book" value="@book" />
+            </p>
+
+            <p>
+                <label for="chapter">Chapter:</label>
+                <input type="text" name="chapter" value="@chapter" />
+            </p>
+
+            <p>
+                <label for="verse">Verse:</label>
+                <input type="text" name="verse" value="@verse" />
+            </p>
+
+            <p>
+                <label for="note">Note:</label>
+                <input type="text" name="note" value="@note" />
+            </p>
+
+            <input type="hidden" name="id" value="@Id" />
+
+            <p><input type="submit" name="buttonSubmit" value="Submit Changes" /></p>
+        </fieldset>
+    </form>
+    <p><a href="~/Favourites">Return to all sparklets</a></p>
+</body>
+</html>
